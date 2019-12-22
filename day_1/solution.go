@@ -9,20 +9,20 @@ import (
 	"strconv"
 )
 
-func readInput(path string) []string {
+func readInput(path string, separator string) []string {
 	content, err := ioutil.ReadFile(path)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	var input = strings.Split(string(content), "\n")
+	var input = strings.Split(string(content), separator)
 
 	return input
 }
 
 func main() {
-	input := readInput("input.txt")
+	input := readInput("input.txt", "\n")
 
 	var length = len(input)
 
