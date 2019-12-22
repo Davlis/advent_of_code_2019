@@ -46,15 +46,13 @@ const (
 	HaltOp     = 99
 )
 
-func main() {
-	var input = parseStringMapToIntMap(
-		readInput("input.txt", ","),
-	)
+func solution(array []int, noun int, verb int) int {
+	var length = len(array)
+	var input = make([]int, length)
+	copy(input, array)
 
-	input[1] = 12
-	input[2] = 2
-
-	var length = len(input)
+	input[1] = noun
+	input[2] = verb
 
 	var idx = 0
 	for {
@@ -94,5 +92,32 @@ func main() {
 		idx += 4
 	}
 
-	fmt.Printf("Result for given input is %d\n", input[0])
+	return input[0]
+}
+
+func main() {
+	var input = parseStringMapToIntMap(
+		readInput("input.txt", ","),
+	)
+
+	firstResult := solution(input, 12, 2)
+	fmt.Printf("Result for first part for given input is %d\n", firstResult)
+
+	for i := 0; i <= 99; i++ {
+		brk := false
+
+		for j := 0; j <= 99; j++ {
+			var result = solution(input, i, j)
+
+			if result == 19690720 {
+				fmt.Printf("Required noun and verb to receive 19690720 output are %d, %d\n", i, j)
+				brk = true
+				break
+			}
+		}
+
+		if brk {
+			break
+		}
+	}
 }
