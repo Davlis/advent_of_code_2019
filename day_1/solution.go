@@ -40,12 +40,30 @@ func main() {
 		arrayOfNums[i] = num
 	}
 
-	var mass = 0
+	var pureMass = 0
 
 	for i := 0; i < length; i++ {
 		var el = arrayOfNums[i]
-		mass += (el / 3) - 2
+		pureMass += (el / 3) - 2
 	}
 
-	fmt.Printf("Result for given input is %d\n", mass)
+	fmt.Printf("Result of pure mass for given input is %d\n", pureMass)
+
+	var fuelMass = 0
+
+	for i := 0; i < length; i++ {
+		var el = arrayOfNums[i]
+
+		for {
+			el = (el / 3) - 2
+
+			if el <= 0 {
+				break
+			}
+
+			fuelMass += el
+		}
+	}
+
+	fmt.Printf("Result of fuel mass for given input is %d\n", fuelMass)
 }
