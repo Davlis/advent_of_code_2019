@@ -1,5 +1,221 @@
 package main
 
+import (
+	"fmt"
+	"io/ioutil"
+	"log"
+	"math"
+	"strings"
+	"strconv"
+)
+
+func readInput(path string, separator string) []string {
+	content, err := ioutil.ReadFile(path)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var input = strings.Split(string(content), separator)
+
+	return input
+}
+
+const (
+	Right = 'R'
+	Left = 'L'
+	Up = 'U'
+	Down = 'D'
+)
+
+func parseDirectionStringToWiresMap(directionString string) [][][]int {
+	var rawWireMap = strings.Split(string(directionString), ",")
+
+	var wireParts = len(rawWireMap)
+
+	wiresMap := [][2][2]int { { {0, 0} } }
+
+	previousPoint := [2]int {0, 0}
+
+	for idx, value := range rawWireMap {
+		var dirEl = value[0]
+		var posEl = value[1:]
+
+		num, err := strconv.Atoi(posEl)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		var currentPoint = make([]int, 2)
+		copy(currentPoint, previousPoint)
+
+		wiresMap[idx][0] = previousPoint
+
+		switch dirEl {
+		case Right:
+			currentPoint[0] += num
+		case Left:
+			currentPoint[0] -= num
+		case Up:
+			currentPoint[1] += num
+		case Down:
+			currentPoint[1] -= num
+		default:
+			log.Fatal("Default case")
+		}
+
+
+		wiresMap[idx][1] = append(wiresMap[idx][1], currentPoint)
+		copy(previousPoint, currentPoint)
+	}
+}
+
+func solution(firstInput [][][]int, secondInput [][][]int) int {
+	var fLength = len(firstInput)
+	var sLength = len(secondInput)
+
+	var intersectionsPoints [][2]int
+
+	// Note: Get intersection points
+	for i := 0; i < fLength; i++ {
+		var firstEl = firstInput[i]
+		var firstHorizontal = checkIfHorizontal(firstEl)
+
+		xes := [2]int{firstEl[0][0], firstEl[1][0]}
+		yes := [2]int{firstEl[0][1], firstEl[1][1]}
+
+		for j := 0; j < sLength; j++ {
+			var secondEl = secondInput[j]
+			var secondHorizontal = checkIfHorizontal(secondEl)
+
+			if firstHorizontal == secondHorizontal {
+				continue
+			}
+
+			var x = secondEl[0][0]
+			var y = secondEl[0][1]
+
+			var intersectionPoint [2]int
+
+			if firstHorizontal == true && pointInRange(xes, x) {
+				intersectionPoint = [2]int{x, yes[0]}
+			}
+
+			if firstHorizontal == false && pointInRange(yes, y) {
+				intersectionPoint = [2]int{xes[0], y}
+			}
+
+			// Note: Ignore 0,0 point (central)
+			if intersectionPoint[0] == 0 && intersectionPoint[1] == 0 {
+				continue
+			}
+
+			intersectionsPoints = append(intersectionsPoints, intersectionPoint)
+		}
+	}
+
+	var iLength = len(intersectionsPoints)
+	var distances []int
+
+	// Note: Calculate Manhattan distance for each intersection point
+	for i := 0; i < iLength; i++ {
+		var el = intersectionsPoints[i]
+		var distance = manhattanDist(el)
+		distances = append(distances, distance)
+
+		fmt.Printf("distance %d %d\n", i, distance)
+	}
+
+	var smallestDistance = min(distances)
+
+	return smallestDistance
+}
+
+func checkIfHorizontal(el [][]int) bool {
+	var isHorizontal = true
+
+	if el[0][0] == el[1][0] {
+		isHorizontal = false
+	}
+
+	return isHorizontal
+}
+
+func pointInRange(el [2]int, point int) bool {
+	var x0 = el[0]
+	var x1 = el[1]
+
+	var tempX1 = x1
+
+	if x0 > x1 {
+		x0 = x1
+		x1 = tempX1
+	}
+
+	return x0 <= point && point <= x1
+}
+
+func min(array []int) int {
+	var min = array[0]
+
+	for _, value := range array {
+		if value < min {
+			min = value
+		}
+	}
+
+	return min
+}
+
+func manhattanDist(point [2]int) int {
+	return (int)(math.Abs(float64(point[0])) + math.Abs(float64(point[1])))
+}
+
 func main() {
-	return
+	// TODO: make array with lines from input file
+
+	input := readInput("test.txt", "\n")
+
+	wire1 := parseDirectionStringToWiresMap(input[0])
+	wire2 := parseDirectionStringToWiresMap(input[1])
+
+	for idx, val := range wire1 {
+		fmt.Printf("Wire 1, iteration %d : {%d, %d} \n" , idx, val[0], val[1])
+	}
+
+	fmt.Printf("\n\n")
+
+	for idx, val := range wire2 {
+		fmt.Printf("Wire 2, iteration %d : {%d, %d} \n" , idx, val[0], val[1])
+	}
+
+	// Example of array for R8,U5,L5,D3
+	// [ [ [0, 0], [8, 0] ], [ [8, 0], [8, 5] ], [ [8, 5], [3, 5] ], [ [3, 5], [3, 2] ] ]
+
+	// Example of array for U7,R6,D4,L4
+	// [ [ [0, 0], [0, 7] ], [ [0, 7], [6, 7] ], [ [6, 7], [6, 3] ], [ [6, 3], [2, 3] ] ]
+
+	// smallestDistance := solution(el1, el2)
+	// fmt.Printf("Result for first part for given input is %d\n", smallestDistance)
+
+	/*
+		wire1 := [][][]int{
+			{{0, 0}, {8, 0}},
+			{{8, 0}, {8, 5}},
+			{{8, 5}, {3, 5}},
+			{{3, 5}, {3, 2}},
+		}
+
+		wire2 := [][][]int{
+			{{0, 0}, {0, 7}},
+			{{0, 7}, {6, 7}},
+			{{6, 7}, {6, 3}},
+			{{6, 3}, {2, 3}},
+		}
+
+		smallestDistance := solution(wire1, wire2)
+
+		fmt.Printf("Result for first part for given input is %d\n", smallestDistance)
+	*/
 }
