@@ -31,23 +31,14 @@ const (
 func parseDirectionStringToWiresMap(directionString string) [][][]int {
 	var rawWireMap = strings.Split(string(directionString), ",")
 
-	var wireParts = len(rawWireMap)
-
-	fmt.Printf("Done 1\n")
-
-	var wiresMap = make([][][]int, wireParts)
+	var wirePartsLength = len(rawWireMap)
+	var wiresMap = make([][][]int, wirePartsLength)
 
 	previousPoint := []int {0, 0}
 
-	fmt.Printf("Done 2\n")
-
 	for idx, value := range rawWireMap {
-		fmt.Printf("Done 3\n")
-	
 		var dirEl = value[0]
 		var posEl = value[1:]
-
-		fmt.Printf("Done 4 dirEl = %s posEl = %d, value %s\n", dirEl, posEl, value)
 
 		num, err := strconv.Atoi(posEl)
 
@@ -55,18 +46,8 @@ func parseDirectionStringToWiresMap(directionString string) [][][]int {
 			log.Fatal(err)
 		}
 
-		if (dirEl == 'R' && num == 8) {
-			fmt.Printf("Done 5\n")
-		}
-
 		currentPoint := []int {0, 0}
 		copy(currentPoint, previousPoint)
-
-		fmt.Printf("Done 6\n")
-
-		wiresMap[idx][0] = previousPoint
-
-		fmt.Printf("Done 7\n")
 
 		switch dirEl {
 		case Right:
@@ -81,9 +62,16 @@ func parseDirectionStringToWiresMap(directionString string) [][][]int {
 			log.Fatal("Default case")
 		}
 
-
-		wiresMap[idx][1] = currentPoint
+		pPoint := []int{0 ,0}
+		cPoint := []int{0 ,0}
+	
+		copy(pPoint, previousPoint)
+		copy(cPoint, currentPoint)
 		copy(previousPoint, currentPoint)
+
+		line := [][]int{pPoint, cPoint}
+
+		wiresMap[idx] = line
 	}
 
 	return wiresMap
@@ -195,9 +183,17 @@ func main() {
 
 	input := readInput("test.txt", "\n")
 
+	fmt.Printf("Input[0] %v\n", input[0])
+	fmt.Printf("Input[1] %v\n", input[1])
+
 	wire1 := parseDirectionStringToWiresMap(input[0])
 	wire2 := parseDirectionStringToWiresMap(input[1])
 
+	fmt.Printf("wire1 %v\n", wire1)
+	fmt.Printf("wire2 %v\n", wire2)
+
+
+	/*
 	for idx, val := range wire1 {
 		fmt.Printf("Wire 1, iteration %d : {%d, %d} \n" , idx, val[0], val[1])
 	}
@@ -206,7 +202,7 @@ func main() {
 
 	for idx, val := range wire2 {
 		fmt.Printf("Wire 2, iteration %d : {%d, %d} \n" , idx, val[0], val[1])
-	}
+	}*/
 
 	// Example of array for R8,U5,L5,D3
 	// [ [ [0, 0], [8, 0] ], [ [8, 0], [8, 5] ], [ [8, 5], [3, 5] ], [ [3, 5], [3, 2] ] ]
