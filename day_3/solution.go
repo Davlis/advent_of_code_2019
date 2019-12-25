@@ -33,13 +33,21 @@ func parseDirectionStringToWiresMap(directionString string) [][][]int {
 
 	var wireParts = len(rawWireMap)
 
-	wiresMap := [][2][2]int { { {0, 0} } }
+	fmt.Printf("Done 1\n")
 
-	previousPoint := [2]int {0, 0}
+	var wiresMap = make([][][]int, wireParts)
+
+	previousPoint := []int {0, 0}
+
+	fmt.Printf("Done 2\n")
 
 	for idx, value := range rawWireMap {
+		fmt.Printf("Done 3\n")
+	
 		var dirEl = value[0]
 		var posEl = value[1:]
+
+		fmt.Printf("Done 4 dirEl = %s posEl = %d, value %s\n", dirEl, posEl, value)
 
 		num, err := strconv.Atoi(posEl)
 
@@ -47,10 +55,18 @@ func parseDirectionStringToWiresMap(directionString string) [][][]int {
 			log.Fatal(err)
 		}
 
-		var currentPoint = make([]int, 2)
+		if (dirEl == 'R' && num == 8) {
+			fmt.Printf("Done 5\n")
+		}
+
+		currentPoint := []int {0, 0}
 		copy(currentPoint, previousPoint)
 
+		fmt.Printf("Done 6\n")
+
 		wiresMap[idx][0] = previousPoint
+
+		fmt.Printf("Done 7\n")
 
 		switch dirEl {
 		case Right:
@@ -66,24 +82,26 @@ func parseDirectionStringToWiresMap(directionString string) [][][]int {
 		}
 
 
-		wiresMap[idx][1] = append(wiresMap[idx][1], currentPoint)
+		wiresMap[idx][1] = currentPoint
 		copy(previousPoint, currentPoint)
 	}
+
+	return wiresMap
 }
 
 func solution(firstInput [][][]int, secondInput [][][]int) int {
 	var fLength = len(firstInput)
 	var sLength = len(secondInput)
 
-	var intersectionsPoints [][2]int
+	var intersectionsPoints [][]int
 
 	// Note: Get intersection points
 	for i := 0; i < fLength; i++ {
 		var firstEl = firstInput[i]
 		var firstHorizontal = checkIfHorizontal(firstEl)
 
-		xes := [2]int{firstEl[0][0], firstEl[1][0]}
-		yes := [2]int{firstEl[0][1], firstEl[1][1]}
+		xes := []int{firstEl[0][0], firstEl[1][0]}
+		yes := []int{firstEl[0][1], firstEl[1][1]}
 
 		for j := 0; j < sLength; j++ {
 			var secondEl = secondInput[j]
@@ -96,14 +114,14 @@ func solution(firstInput [][][]int, secondInput [][][]int) int {
 			var x = secondEl[0][0]
 			var y = secondEl[0][1]
 
-			var intersectionPoint [2]int
+			var intersectionPoint []int
 
 			if firstHorizontal == true && pointInRange(xes, x) {
-				intersectionPoint = [2]int{x, yes[0]}
+				intersectionPoint = []int{x, yes[0]}
 			}
 
 			if firstHorizontal == false && pointInRange(yes, y) {
-				intersectionPoint = [2]int{xes[0], y}
+				intersectionPoint = []int{xes[0], y}
 			}
 
 			// Note: Ignore 0,0 point (central)
@@ -142,7 +160,7 @@ func checkIfHorizontal(el [][]int) bool {
 	return isHorizontal
 }
 
-func pointInRange(el [2]int, point int) bool {
+func pointInRange(el []int, point int) bool {
 	var x0 = el[0]
 	var x1 = el[1]
 
@@ -168,7 +186,7 @@ func min(array []int) int {
 	return min
 }
 
-func manhattanDist(point [2]int) int {
+func manhattanDist(point []int) int {
 	return (int)(math.Abs(float64(point[0])) + math.Abs(float64(point[1])))
 }
 
