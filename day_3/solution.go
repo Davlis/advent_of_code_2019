@@ -88,38 +88,56 @@ func solution(firstInput [][][]int, secondInput [][][]int) int {
 		var firstEl = firstInput[i]
 		var firstHorizontal = checkIfHorizontal(firstEl)
 
-		xes := []int{firstEl[0][0], firstEl[1][0]}
-		yes := []int{firstEl[0][1], firstEl[1][1]}
+		fmt.Printf("firstEl %v\n", firstEl)
+
+		fXes := []int{firstEl[0][0], firstEl[1][0]}
+		fYes := []int{firstEl[0][1], firstEl[1][1]}
 
 		for j := 0; j < sLength; j++ {
 			var secondEl = secondInput[j]
 			var secondHorizontal = checkIfHorizontal(secondEl)
 
+			fmt.Printf("secondEl %v\n", secondEl)
+
 			if firstHorizontal == secondHorizontal {
 				continue
 			}
+
+			sXes := []int{secondEl[0][0], secondEl[1][0]}
+			sYes := []int{secondEl[0][1], secondEl[1][1]}
 
 			var x = secondEl[0][0]
 			var y = secondEl[0][1]
 
 			var intersectionPoint []int
 
-			if firstHorizontal == true && pointInRange(xes, x) {
-				intersectionPoint = []int{x, yes[0]}
+			if firstHorizontal == true && pointInRange(fXes, x) && pointInRange(sYes, fYes[0]) {
+				intersectionPoint = []int{x, fYes[0]}
 			}
 
-			if firstHorizontal == false && pointInRange(yes, y) {
-				intersectionPoint = []int{xes[0], y}
+			if firstHorizontal == false && pointInRange(fYes, y) && pointInRange(sXes, fXes[0]) {
+				intersectionPoint = []int{fXes[0], y}
+			}
+
+			// Note: Lack of intersection point
+			if len(intersectionPoint) == 0 {
+				fmt.Printf("No intersection point...\n")
+				continue
 			}
 
 			// Note: Ignore 0,0 point (central)
 			if intersectionPoint[0] == 0 && intersectionPoint[1] == 0 {
+				fmt.Printf("Central point... ignoring\n")
 				continue
 			}
+
+			fmt.Printf("intersectionPoint = %v\n", intersectionPoint)
 
 			intersectionsPoints = append(intersectionsPoints, intersectionPoint)
 		}
 	}
+
+	fmt.Printf("intersectionsPoints %v\n",  intersectionsPoints)
 
 	var iLength = len(intersectionsPoints)
 	var distances []int
@@ -129,8 +147,6 @@ func solution(firstInput [][][]int, secondInput [][][]int) int {
 		var el = intersectionsPoints[i]
 		var distance = manhattanDist(el)
 		distances = append(distances, distance)
-
-		fmt.Printf("distance %d %d\n", i, distance)
 	}
 
 	var smallestDistance = min(distances)
@@ -152,11 +168,11 @@ func pointInRange(el []int, point int) bool {
 	var x0 = el[0]
 	var x1 = el[1]
 
-	var tempX1 = x1
+	var tempX0 = x0
 
 	if x0 > x1 {
 		x0 = x1
-		x1 = tempX1
+		x1 = tempX0
 	}
 
 	return x0 <= point && point <= x1
@@ -179,57 +195,29 @@ func manhattanDist(point []int) int {
 }
 
 func main() {
-	// TODO: make array with lines from input file
-
-	input := readInput("test.txt", "\n")
-
-	fmt.Printf("Input[0] %v\n", input[0])
-	fmt.Printf("Input[1] %v\n", input[1])
+	input := readInput("input.txt", "\n")
 
 	wire1 := parseDirectionStringToWiresMap(input[0])
 	wire2 := parseDirectionStringToWiresMap(input[1])
 
-	fmt.Printf("wire1 %v\n", wire1)
-	fmt.Printf("wire2 %v\n", wire2)
-
-
-	/*
-	for idx, val := range wire1 {
-		fmt.Printf("Wire 1, iteration %d : {%d, %d} \n" , idx, val[0], val[1])
+/*
+	wire1 := [][][]int{
+		{{0, 0}, {8, 0}},
+		{{8, 0}, {8, 5}},
+		{{8, 5}, {3, 5}},
+		{{3, 5}, {3, 2}},
 	}
 
-	fmt.Printf("\n\n")
+	wire2 := [][][]int{
+		{{0, 0}, {0, 7}},
+		{{0, 7}, {6, 7}},
+		{{6, 7}, {6, 3}},
+		{{6, 3}, {2, 3}},
+	}
+*/
+	
 
-	for idx, val := range wire2 {
-		fmt.Printf("Wire 2, iteration %d : {%d, %d} \n" , idx, val[0], val[1])
-	}*/
+	smallestDistance := solution(wire1, wire2)
 
-	// Example of array for R8,U5,L5,D3
-	// [ [ [0, 0], [8, 0] ], [ [8, 0], [8, 5] ], [ [8, 5], [3, 5] ], [ [3, 5], [3, 2] ] ]
-
-	// Example of array for U7,R6,D4,L4
-	// [ [ [0, 0], [0, 7] ], [ [0, 7], [6, 7] ], [ [6, 7], [6, 3] ], [ [6, 3], [2, 3] ] ]
-
-	// smallestDistance := solution(el1, el2)
-	// fmt.Printf("Result for first part for given input is %d\n", smallestDistance)
-
-	/*
-		wire1 := [][][]int{
-			{{0, 0}, {8, 0}},
-			{{8, 0}, {8, 5}},
-			{{8, 5}, {3, 5}},
-			{{3, 5}, {3, 2}},
-		}
-
-		wire2 := [][][]int{
-			{{0, 0}, {0, 7}},
-			{{0, 7}, {6, 7}},
-			{{6, 7}, {6, 3}},
-			{{6, 3}, {2, 3}},
-		}
-
-		smallestDistance := solution(wire1, wire2)
-
-		fmt.Printf("Result for first part for given input is %d\n", smallestDistance)
-	*/
+	fmt.Printf("Result for first part for given input is %d\n", smallestDistance)
 }
