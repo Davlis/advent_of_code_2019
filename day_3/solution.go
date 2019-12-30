@@ -155,9 +155,9 @@ func solution(firstInput [][][]int, secondInput [][][]int) (int, int) {
 
 	var smallestDistance = min(distances)
 
-	var vectorSteps []int
-
+	// Note: Calculate vector transformation steps sum for each intersection point
 	fmt.Printf("vectorMovements %v\n", vectorMovements)
+	var vectorSteps []int
 
 	for i := 0; i < iLength; i++ {
 		var intersectionEl = intersectionsPoints[i]
@@ -171,8 +171,6 @@ func solution(firstInput [][][]int, secondInput [][][]int) (int, int) {
 
 		vectorSteps = append(vectorSteps, transformation)
 	}
-
-	fmt.Printf("vectorSteps %v\n", vectorSteps)
 
 	var smallestVectorStep = min(vectorSteps)
 
