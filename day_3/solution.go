@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"log"
 	"math"
-	"strings"
 	"strconv"
+	"strings"
 )
 
 func readInput(path string, separator string) []string {
@@ -23,9 +23,9 @@ func readInput(path string, separator string) []string {
 
 const (
 	Right = 'R'
-	Left = 'L'
-	Up = 'U'
-	Down = 'D'
+	Left  = 'L'
+	Up    = 'U'
+	Down  = 'D'
 )
 
 func parseDirectionStringToWiresMap(directionString string) [][][]int {
@@ -34,7 +34,7 @@ func parseDirectionStringToWiresMap(directionString string) [][][]int {
 	var wirePartsLength = len(rawWireMap)
 	var wiresMap = make([][][]int, wirePartsLength)
 
-	previousPoint := []int {0, 0}
+	previousPoint := []int{0, 0}
 
 	for idx, value := range rawWireMap {
 		var dirEl = value[0]
@@ -46,7 +46,7 @@ func parseDirectionStringToWiresMap(directionString string) [][][]int {
 			log.Fatal(err)
 		}
 
-		currentPoint := []int {0, 0}
+		currentPoint := []int{0, 0}
 		copy(currentPoint, previousPoint)
 
 		switch dirEl {
@@ -62,9 +62,9 @@ func parseDirectionStringToWiresMap(directionString string) [][][]int {
 			log.Fatal("Default case")
 		}
 
-		pPoint := []int{0 ,0}
-		cPoint := []int{0 ,0}
-	
+		pPoint := []int{0, 0}
+		cPoint := []int{0, 0}
+
 		copy(pPoint, previousPoint)
 		copy(cPoint, currentPoint)
 		copy(previousPoint, currentPoint)
@@ -77,11 +77,12 @@ func parseDirectionStringToWiresMap(directionString string) [][][]int {
 	return wiresMap
 }
 
-func solution(firstInput [][][]int, secondInput [][][]int) int {
+func solution(firstInput [][][]int, secondInput [][][]int) (int, int) {
 	var fLength = len(firstInput)
 	var sLength = len(secondInput)
 
 	var intersectionsPoints [][]int
+	var vectorMovements [][]int
 
 	// Note: Get intersection points
 	for i := 0; i < fLength; i++ {
@@ -131,13 +132,16 @@ func solution(firstInput [][][]int, secondInput [][][]int) int {
 				continue
 			}
 
+			vectorMovement := []int{i, j}
+			fmt.Printf("vectorMovement = %v\n", vectorMovement)
 			fmt.Printf("intersectionPoint = %v\n", intersectionPoint)
 
 			intersectionsPoints = append(intersectionsPoints, intersectionPoint)
+			vectorMovements = append(vectorMovements, vectorMovement)
 		}
 	}
 
-	fmt.Printf("intersectionsPoints %v\n",  intersectionsPoints)
+	fmt.Printf("intersectionsPoints %v\n", intersectionsPoints)
 
 	var iLength = len(intersectionsPoints)
 	var distances []int
@@ -151,7 +155,28 @@ func solution(firstInput [][][]int, secondInput [][][]int) int {
 
 	var smallestDistance = min(distances)
 
-	return smallestDistance
+	var vectorSteps []int
+
+	fmt.Printf("vectorMovements %v\n", vectorMovements)
+
+	for i := 0; i < iLength; i++ {
+		var intersectionEl = intersectionsPoints[i]
+		var fVectorMovements = vectorMovements[i][0]
+		var sVectorMovemenets = vectorMovements[i][1]
+
+		var transformation = 0
+
+		transformation += countVectorSteps(firstInput, intersectionEl, fVectorMovements) +
+			countVectorSteps(secondInput, intersectionEl, sVectorMovemenets)
+
+		vectorSteps = append(vectorSteps, transformation)
+	}
+
+	fmt.Printf("vectorSteps %v\n", vectorSteps)
+
+	var smallestVectorStep = min(vectorSteps)
+
+	return smallestDistance, smallestVectorStep
 }
 
 func checkIfHorizontal(el [][]int) bool {
@@ -190,6 +215,29 @@ func min(array []int) int {
 	return min
 }
 
+func countVectorSteps(vectors [][][]int, intersectionPoint []int, movements int) int {
+	var transformationSum = 0
+
+	for i := 0; i < movements; i++ {
+		var el = vectors[i]
+
+		if i+1 == movements {
+			var xVector = (int)(math.Abs(float64(intersectionPoint[0] - el[0][0])))
+			var yVector = (int)(math.Abs(float64(intersectionPoint[1] - el[0][1])))
+
+			transformationSum += xVector + yVector
+			break
+		}
+
+		var xVector = (int)(math.Abs(float64(el[1][0] - el[0][0])))
+		var yVector = (int)(math.Abs(float64(el[1][1] - el[0][1])))
+
+		transformationSum += xVector + yVector
+	}
+
+	return transformationSum
+}
+
 func manhattanDist(point []int) int {
 	return (int)(math.Abs(float64(point[0])) + math.Abs(float64(point[1])))
 }
@@ -200,24 +248,8 @@ func main() {
 	wire1 := parseDirectionStringToWiresMap(input[0])
 	wire2 := parseDirectionStringToWiresMap(input[1])
 
-/*
-	wire1 := [][][]int{
-		{{0, 0}, {8, 0}},
-		{{8, 0}, {8, 5}},
-		{{8, 5}, {3, 5}},
-		{{3, 5}, {3, 2}},
-	}
-
-	wire2 := [][][]int{
-		{{0, 0}, {0, 7}},
-		{{0, 7}, {6, 7}},
-		{{6, 7}, {6, 3}},
-		{{6, 3}, {2, 3}},
-	}
-*/
-	
-
-	smallestDistance := solution(wire1, wire2)
+	smallestDistance, smallestVectorStep := solution(wire1, wire2)
 
 	fmt.Printf("Result for first part for given input is %d\n", smallestDistance)
+	fmt.Printf("Result for second part for given input is %d\n", smallestVectorStep)
 }
